@@ -422,3 +422,120 @@ mysql> SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age
 
 mysql> 
 ```
+
+Of course, we should update Bowser's date of death, too:
+```sql
+mysql> UPDATE pet SET death = death + INTERVAL 15 YEAR WHERE death IS NOT NULL;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM pet;
++----------+--------+---------+------+------------+------------+
+| name     | owner  | species | sex  | birth      | death      |
++----------+--------+---------+------+------------+------------+
+| Fluffy   | Harold | cat     | f    | 2008-02-04 | NULL       |
+| Claws    | Gwen   | cat     | m    | 2009-03-17 | NULL       |
+| Buffy    | Harold | dog     | f    | 2004-05-13 | NULL       |
+| Fang     | Benny  | dog     | m    | 2005-08-27 | NULL       |
+| Bowser   | Diane  | dog     | m    | 2004-08-31 | 2010-07-29 |
+| Chirpy   | Gwen   | bird    | f    | 2013-09-11 | NULL       |
+| Whistler | Gwen   | bird    | m    | 2012-12-09 | NULL       |
+| Slim     | Benny  | snake   | m    | 2011-04-29 | NULL       |
+| Puffball | Diane  | hamster | f    | 2014-03-30 | NULL       |
++----------+--------+---------+------+------------+------------+
+9 rows in set (0.00 sec)
+
+mysql>
+```
+
+### Working with NULL Values
+
+The NULL value can be surprising until you get used to it. 
+Conceptually, NULL means "a missing unknown value" and it 
+is treated somewhat differently from other values.
+
+To test for NULL, use the `IS NULL` and `IS NOT NULL` operators, as shown here:
+
+```sql
+mysql> SELECT 1 IS NULL, 1 IS NOT NULL;
++-----------+---------------+
+| 1 IS NULL | 1 IS NOT NULL |
++-----------+---------------+
+|         0 |             1 |
++-----------+---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+A common error when working with NULL is to assume that it is not possible to insert a zero or an empty string into a column defined as NOT NULL, but this is not the case. These are in fact values, whereas NULL means “not having a value.” You can test this easily enough by using IS [NOT] NULL as shown:
+
+```sql
+mysql> SELECT 0 IS NULL, 0 IS NOT NULL, '' IS NULL, '' IS NOT NULL;
++-----------+---------------+------------+----------------+
+| 0 IS NULL | 0 IS NOT NULL | '' IS NULL | '' IS NOT NULL |
++-----------+---------------+------------+----------------+
+|         0 |             1 |          0 |              1 |
++-----------+---------------+------------+----------------+
+1 row in set (0.00 sec)
+
+mysql>
+```
+
+### Pattern Matching
+
+MySQL provides **standard SQL pattern matching** as well as a form of pattern matching based on extended regular expressions similar to those used by Unix utilities such as vi, grep, and sed.
+
+To get a list of pets whose name starts with a 'b' we use the 
+query `SELECT * FROM pet WHERE name LIKE 'b%';`
+
+```sql
+mysql> SELECT * FROM pet WHERE name LIKE 'b%';
++--------+--------+---------+------+------------+------------+
+| name   | owner  | species | sex  | birth      | death      |
++--------+--------+---------+------+------------+------------+
+| Buffy  | Harold | dog     | f    | 2004-05-13 | NULL       |
+| Bowser | Diane  | dog     | m    | 2004-08-31 | 2010-07-29 |
++--------+--------+---------+------+------------+------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+```
+
+With `SELECT * FROM pet WHERE name LIKE '%fy';` we get all pets whos name ends with 'fy':
+
+```sql
+mysql> SELECT * FROM pet WHERE name LIKE '%fy';
++--------+--------+---------+------+------------+-------+
+| name   | owner  | species | sex  | birth      | death |
++--------+--------+---------+------+------------+-------+
+| Fluffy | Harold | cat     | f    | 2008-02-04 | NULL  |
+| Buffy  | Harold | dog     | f    | 2004-05-13 | NULL  |
++--------+--------+---------+------+------------+-------+
+2 rows in set (0.00 sec)
+
+mysql>
+```
+
+To find names containing exactly five characters, use five 
+instances of the '_' pattern character:
+
+```sql
+mysql> SELECT * FROM pet WHERE name LIKE '_____';
++-------+--------+---------+------+------------+-------+
+| name  | owner  | species | sex  | birth      | death |
++-------+--------+---------+------+------------+-------+
+| Claws | Gwen   | cat     | m    | 2009-03-17 | NULL  |
+| Buffy | Harold | dog     | f    | 2004-05-13 | NULL  |
++-------+--------+---------+------+------------+-------+
+2 rows in set (0.00 sec)
+
+mysql>
+```
+
+The other type of pattern matching provided by MySQL uses extended **regular expressions**. When you test for a match for this type of pattern, use the 'REGEXP_LIKE()' function (or the REGEXP or RLIKE operators, which are synonyms for 'REGEXP_LIKE())'.
+
+To find names containing a w, use this query:
+
+￼
+mysql> SELECT * FROM pet WHERE REGEXP_LIKE(name, 'w');
