@@ -533,13 +533,13 @@ mysql> SELECT * FROM pet WHERE name LIKE '_____';
 mysql>
 ```
 
-The other type of pattern matching provided by MySQL uses extended **regular expressions**. When you 
-test for a match for this type of pattern, use the 'REGEXP_LIKE()' function (or the REGEXP or 
-RLIKE operators, which are synonyms for 'REGEXP_LIKE())'.
+The other type of pattern matching provided by MySQL uses extended **regular expressions**. When you test for a match for this type of 
+pattern, use the 'REGEXP_LIKE()' function (or the 'REGEXP' or 
+'RLIKE' operators, which are synonyms for 'REGEXP_LIKE()').
 
-To find names containing a w, use this query:
+To find names containing a 'w', use this query:
 
-￼```sql
+```sql
 mysql> SELECT * FROM pet WHERE REGEXP_LIKE(name, 'w');
 ERROR 1305 (42000): FUNCTION tutorial.REGEXP_LIKE does not exist
 mysql> 
