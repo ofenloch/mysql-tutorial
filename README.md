@@ -533,9 +533,40 @@ mysql> SELECT * FROM pet WHERE name LIKE '_____';
 mysql>
 ```
 
-The other type of pattern matching provided by MySQL uses extended **regular expressions**. When you test for a match for this type of pattern, use the 'REGEXP_LIKE()' function (or the REGEXP or RLIKE operators, which are synonyms for 'REGEXP_LIKE())'.
+The other type of pattern matching provided by MySQL uses extended **regular expressions**. When you 
+test for a match for this type of pattern, use the 'REGEXP_LIKE()' function (or the REGEXP or 
+RLIKE operators, which are synonyms for 'REGEXP_LIKE())'.
 
 To find names containing a w, use this query:
 
-￼
+￼```sql
 mysql> SELECT * FROM pet WHERE REGEXP_LIKE(name, 'w');
+ERROR 1305 (42000): FUNCTION tutorial.REGEXP_LIKE does not exist
+mysql> 
+```
+
+As we can see, my version of MySQL does not support 'REGEXP_LIKE'. So let's try something different:
+
+```sql
+mysql> SELECT * FROM pet WHERE name REGEXP 'w';
++----------+-------+---------+------+------------+------------+
+| name     | owner | species | sex  | birth      | death      |
++----------+-------+---------+------+------------+------------+
+| Claws    | Gwen  | cat     | m    | 2014-03-17 | NULL       |
+| Bowser   | Diane | dog     | m    | 2009-08-31 | 2015-07-29 |
+| Whistler | Gwen  | bird    | m    | 2017-12-09 | NULL       |
++----------+-------+---------+------+------------+------------+
+3 rows in set (0.00 sec)
+
+mysql>
+mysql> SELECT * FROM pet WHERE name REGEXP '^w';
++----------+-------+---------+------+------------+-------+
+| name     | owner | species | sex  | birth      | death |
++----------+-------+---------+------+------------+-------+
+| Whistler | Gwen  | bird    | m    | 2017-12-09 | NULL  |
++----------+-------+---------+------+------------+-------+
+1 row in set (0.00 sec)
+
+mysql>
+```
+
