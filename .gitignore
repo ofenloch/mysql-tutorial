@@ -1,0 +1,3 @@
+# ignore generated html and pdf versions of README.md
+README.html
+README.pdf
