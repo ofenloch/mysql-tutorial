@@ -28,6 +28,8 @@ SELECT "Loading data from './pet.txt' ... " as INFO;
 -- Read the text file
 LOAD DATA LOCAL INFILE './pet.txt' INTO TABLE `pet`;
 
+SHOW warnings;
+
 SELECT * FROM pet;
 
 -- Add an entry for Puffball
