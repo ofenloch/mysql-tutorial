@@ -49,7 +49,20 @@ UPDATE pet SET death = death + INTERVAL 20 YEAR WHERE death IS NOT NULL;
 SELECT * FROM `tutorial`.`pet`;
 
 -- List the pets' age
-SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age FROM pet ORDER BY name;
-SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age FROM pet ORDER BY age;
+SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age_in_years FROM tutorial.pet ORDER BY name;
+SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age_in_years FROM tutorial.pet ORDER BY age_in_years;
+
+-- To find names containing exactly five characters, use five 
+-- instances of the '_' pattern character:
+SELECT * FROM pet WHERE name LIKE '_____';
 
 
+--
+-- find out the ages at which each pet had its litters with JOIN
+-- 
+SELECT pet.name, TIMESTAMPDIFF(YEAR,birth,date) AS age, remark FROM pet INNER JOIN event ON pet.name = event.name WHERE event.type = 'litter';
+
+--
+-- find out the ages at which each pet had its litters without JOIN
+-- 
+SELECT pet.name, TIMESTAMPDIFF(YEAR,birth,date) AS age, remark FROM pet, event WHERE pet.name=event.name AND event.type = 'litter';
