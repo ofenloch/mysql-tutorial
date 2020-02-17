@@ -570,3 +570,393 @@ mysql> SELECT * FROM pet WHERE name REGEXP '^w';
 mysql>
 ```
 
+### Counting Rows (Records / Datasets)
+
+Counting the total number of animals you have is the same question as 
+“How many rows are in the pet table?” because there is one record per pet. 
+COUNT(*) counts the number of rows, so the query to count your animals looks like this:
+
+```sql
+mysql> SELECT COUNT(*) FROM pet;
++----------+
+| COUNT(*) |
++----------+
+|        9 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+The next query uses GROUP BY to group all records for each owner. The use 
+of COUNT() in conjunction with GROUP BY is useful for characterizing your 
+data under various groupings.
+
+```sql
+mysql> SELECT owner, COUNT(*) FROM pet GROUP BY owner;
++--------+----------+
+| owner  | COUNT(*) |
++--------+----------+
+| Benny  |        2 |
+| Diane  |        2 |
+| Gwen   |        3 |
+| Harold |        2 |
++--------+----------+
+4 rows in set (0.00 sec)
+
+mysql>
+```
+
+To check how many pets of each species are there use this query:
+
+```sql
+mysql> SELECT species, COUNT(*) FROM pet GROUP BY species;
++---------+----------+
+| species | COUNT(*) |
++---------+----------+
+| bird    |        2 |
+| cat     |        2 |
+| dog     |        3 |
+| hamster |        1 |
+| snake   |        1 |
++---------+----------+
+5 rows in set (0.00 sec)
+
+mysql>
+```
+
+You can even combine characteristics (columns) to get mor details. To get the 
+number of animals per combination of species and sex do this:
+
+```sql
+mysql> SELECT species, sex, COUNT(*) FROM pet GROUP BY species, sex;
++---------+------+----------+
+| species | sex  | COUNT(*) |
++---------+------+----------+
+| bird    | f    |        1 |
+| bird    | m    |        1 |
+| cat     | f    |        1 |
+| cat     | m    |        1 |
+| dog     | f    |        1 |
+| dog     | m    |        2 |
+| hamster | f    |        1 |
+| snake   | m    |        1 |
++---------+------+----------+
+8 rows in set (0.00 sec)
+
+mysql> 
+```
+
+Of course you can limit your query to dogs and cats (for example):
+
+```sql
+mysql> SELECT species, sex, COUNT(*) FROM pet
+    ->        WHERE species = 'dog' OR species = 'cat'
+    ->        GROUP BY species, sex;
++---------+------+----------+
+| species | sex  | COUNT(*) |
++---------+------+----------+
+| cat     | f    |        1 |
+| cat     | m    |        1 |
+| dog     | f    |        1 |
+| dog     | m    |        2 |
++---------+------+----------+
+4 rows in set (0.00 sec)
+
+mysql> 
+```
+
+
+## Using More Than One Table
+
+To use more than one table, we first need to create (at least) a second table:
+
+```sql
+mysql> CREATE TABLE event (name VARCHAR(20), date DATE,
+    ->        type VARCHAR(15), remark VARCHAR(255));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql>
+mysql> DESCRIBE event;
++--------+--------------+------+-----+---------+-------+
+| Field  | Type         | Null | Key | Default | Extra |
++--------+--------------+------+-----+---------+-------+
+| name   | varchar(20)  | YES  |     | NULL    |       |
+| date   | date         | YES  |     | NULL    |       |
+| type   | varchar(15)  | YES  |     | NULL    |       |
+| remark | varchar(255) | YES  |     | NULL    |       |
++--------+--------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql>
+```
+
+Now, we create a file named *event.txt* and load its contents into out new table *event*:
+
+```sql
+mysql> LOAD DATA LOCAL INFILE 'event.txt' INTO TABLE event;
+Query OK, 10 rows affected (0.01 sec)
+Records: 10  Deleted: 0  Skipped: 0  Warnings: 0
+
+mysql> SELECT * from event;
++----------+------------+----------+-----------------------------+
+| name     | date       | type     | remark                      |
++----------+------------+----------+-----------------------------+
+| Fluffy   | 1995-05-15 | litter   | 4 kittens, 3 female, 1 male |
+| Buffy    | 1993-06-23 | litter   | 5 puppies, 2 female, 3 male |
+| Buffy    | 1994-06-19 | litter   | 3 puppies, 3 female         |
+| Chirpy   | 1999-03-21 | vet      | needed beak straightened    |
+| Slim     | 1997-08-03 | vet      | broken rib                  |
+| Bowser   | 1991-10-12 | kennel   |                             |
+| Fang     | 1991-10-12 | kennel   |                             |
+| Fang     | 1998-08-28 | birthday | Gave him a new chew toy     |
+| Claws    | 1998-03-17 | birthday | Gave him a new flea collar  |
+| Whistler | 1998-12-09 | birthday | First birthday              |
++----------+------------+----------+-----------------------------+
+10 rows in set (0.00 sec)
+
+mysql>
+```
+
+As before, we add 15 years to the dates:
+
+```sql
+mysql> UPDATE event SET date = date + INTERVAL 15 YEAR;
+Query OK, 10 rows affected (0.01 sec)
+Rows matched: 10  Changed: 10  Warnings: 0
+
+mysql> 
+```
+Suppose that you want to find out the ages at which each pet had its litters. We 
+saw earlier how to calculate ages from two dates. The litter date of the mother is 
+in the event table, but to calculate her age on that date you need her birth date, 
+which is stored in the pet table. This means the query requires both tables:
+
+```sql
+mysql> SELECT pet.name,
+    ->        TIMESTAMPDIFF(YEAR,birth,date) AS age,
+    ->        remark
+    ->        FROM pet INNER JOIN event
+    ->          ON pet.name = event.name
+    ->        WHERE event.type = 'litter';
++--------+------+-----------------------------+
+| name   | age  | remark                      |
++--------+------+-----------------------------+
+| Fluffy |    2 | 4 kittens, 3 female, 1 male |
+| Buffy  |    4 | 5 puppies, 2 female, 3 male |
+| Buffy  |    5 | 3 puppies, 3 female         |
++--------+------+-----------------------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+```
+
+The FROM clause in this query joins two tables because the query needs to pull information from both of them.
+
+When combining (joining) information from multiple tables, you need to specify how records in one table can 
+be matched to records in the other. This is easy because they both have a name column. The query uses an 
+ON clause to match up records in the two tables based on the name values.
+
+Because the name column occurs in both tables (i.e. it is ambigous), you must be specific about which table you 
+mean when referring to the column. This is done by prepending the table name to the column name.
+
+In the above case you can get the same result *without an INNER JOIN*:
+
+```sql
+mysql> SELECT pet.name,
+    -> TIMESTAMPDIFF(YEAR,birth,date) AS age,
+    -> remark
+    -> FROM pet, event
+    -> WHERE pet.name=event.name AND event.type = 'litter';
++--------+------+-----------------------------+
+| name   | age  | remark                      |
++--------+------+-----------------------------+
+| Fluffy |    2 | 4 kittens, 3 female, 1 male |
+| Buffy  |    4 | 5 puppies, 2 female, 3 male |
+| Buffy  |    5 | 3 puppies, 3 female         |
++--------+------+-----------------------------+
+3 rows in set (0.00 sec)
+
+mysql> 
+```
+
+
+You don't need to have two different tables to perform a join. Sometimes it is useful to join a table to itself, if 
+you want to compare records in a table to other records in that same table. For example, to find breeding pairs 
+among your pets, you can join the pet table with itself to produce candidate pairs of live males and females 
+of like species:
+
+```sql
+mysql> SELECT p1.name, p1.sex, p2.name, p2.sex, p1.species
+    ->        FROM pet AS p1 INNER JOIN pet AS p2
+    ->          ON p1.species = p2.species
+    ->          AND p1.sex = 'f' AND p1.death IS NULL
+    ->          AND p2.sex = 'm' AND p2.death IS NULL;
++--------+------+-------+------+---------+
+| name   | sex  | name  | sex  | species |
++--------+------+-------+------+---------+
+| Fluffy | f    | Claws | m    | cat     |
+| Buffy  | f    | Fang  | m    | dog     |
++--------+------+-------+------+---------+
+2 rows in set (0.01 sec)
+
+mysql> 
+```
+
+This query can be formulated *without INNER JOIN*, too:
+
+```sql
+mysql> SELECT p1.name, p1.sex, p2.name, p2.sex, p1.species
+    ->   FROM pet AS p1, pet AS p2
+    ->   WHERE p1.species = p2.species
+    ->    AND p1.sex = 'f' AND p1.death IS NULL
+    ->    AND p2.sex = 'm' AND p2.death IS NULL;
++--------+------+-------+------+---------+
+| name   | sex  | name  | sex  | species |
++--------+------+-------+------+---------+
+| Fluffy | f    | Claws | m    | cat     |
+| Buffy  | f    | Fang  | m    | dog     |
++--------+------+-------+------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+```
+
+## INNER JOIN, LEFT OUTER JOIN, RIGHT OUTER JOIN, and FULL OUTER JOIN
+
+Suppose you have two tables, with a single column each, and data as follows:
+
+    A    B
+    -    -
+    1    3
+    2    4
+    3    5
+    4    6
+
+Note: 1 and 2 are unique to A. 3 and 4 are common to both tables (sets). 5 and 6 are unique to B.
+
+Let's CRREAT these two tables and INSERT data
+
+```sql
+mysql> CREATE TABLE a (element int);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> CREATE TABLE b (element int);
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> INSERT INTO a VALUES (1),(2),(3),(4);
+Query OK, 4 rows affected (0.00 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO b VALUES (3),(4),(5),(6);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql>
+```
+
+
+**INNER JOIN**
+
+An **INNER JOIN** using either of the equivalent queries gives the intersection of the two tables (sets), i.e. 
+the two rows they have in common:
+
+    SELECT * FROM a INNER JOIN b ON a.element = b.element;
+
+    SELECT a.element, b.element from a,b WHERE a.element = b.element;
+
+
+```sql
+mysql> SELECT * FROM a INNER JOIN b ON a.element = b.element;
++---------+---------+
+| element | element |
++---------+---------+
+|       3 |       3 |
+|       4 |       4 |
++---------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+mysql> SELECT a.element, b.element from a,b WHERE a.element = b.element;
++---------+---------+
+| element | element |
++---------+---------+
+|       3 |       3 |
+|       4 |       4 |
++---------+---------+
+2 rows in set (0.00 sec)
+
+mysql> 
+```
+
+**LEFT OUTER JOIN**
+
+A **LEFT OUTER JOIN** will give all rows in A, plus any common rows in B.
+
+```
+mysql> SELECT * FROM a LEFT OUTER JOIN b ON a.element = b.element;
++---------+---------+
+| element | element |
++---------+---------+
+|       3 |       3 |
+|       4 |       4 |
+|       1 |    NULL |
+|       2 |    NULL |
++---------+---------+
+4 rows in set (0.00 sec)
+
+mysql> 
+```
+
+**RIGHT OUTER JOIN**
+
+A **RIGHT OUTER JOIN** will give all rows in B, plus any common rows in A:
+
+```sql
+mysql> SELECT * FROM a RIGHT OUTER JOIN b on a.element = b.element;
++---------+---------+
+| element | element |
++---------+---------+
+|       3 |       3 |
+|       4 |       4 |
+|    NULL |       5 |
+|    NULL |       6 |
++---------+---------+
+4 rows in set (0.00 sec)
+
+mysql> 
+```
+
+**FULL OUTER JOIN**
+
+A **FULL OUTER JOIN**  will give you the union of A and B, i.e., all the rows in A and all the 
+rows in B. If something in A doesn't have a corresponding datum in B, then the B portion is 
+null, and vice versa.
+
+There is no **FULL OUTER JOIN** in MySQL. But we can simulate one with UNION:
+
+```sql
+mysql> SELECT * FROM a
+    ->     LEFT JOIN b ON a.element = b.element
+    ->     UNION
+    ->     SELECT * FROM a
+    ->     RIGHT OUTER JOIN b ON a.element = b.element;
++---------+---------+
+| element | element |
++---------+---------+
+|       3 |       3 |
+|       4 |       4 |
+|       1 |    NULL |
+|       2 |    NULL |
+|    NULL |       5 |
+|    NULL |       6 |
++---------+---------+
+6 rows in set (0.00 sec)
+
+mysql> 
+```
+
+
+The [following image](https://i.stack.imgur.com/3bs7C.png) shows the various types of JOINs and their meaning
+
+![JOIN](./INNER-LEFT-RIGHT-OUTER-JOIN.png)
