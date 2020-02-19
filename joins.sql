@@ -28,7 +28,13 @@ USE `tutorial`;
 -- 3 rows in set (0.00 sec)
 
 -- mysql> 
-
+--
+-- Die Beispiel-Tabellen haben folgende Besonderheiten:
+-- * Die Mitarbeiterin oder der Mitarbeiter namens „Meyer“ ist keiner Abteilung 
+--   zugeordnet. Der Wert NULL als AbtId bedeutet in SQL, dass dieser Wert unbekannt ist.
+--
+-- * Die Abteilung „Marketing“ hat keine zugeordneten Mitarbeiter.
+--
 
 -- Tabelle `Mitarbeiter` löschen
 DROP TABLE IF EXISTS `Mitarbeiter`;
@@ -94,6 +100,23 @@ SELECT * FROM Mitarbeiter CROSS JOIN Abteilung;
 SELECT "Gleichwertige Abfrage 'SELECT * FROM Mitarbeiter, Abteilung;' " AS INFO;
 SELECT * FROM Mitarbeiter, Abteilung;
 
+--
+-- LEFT OUTER JOIN
+--
+SELECT "LEFT OUTER JOIN: " AS INFO;
+SELECT * FROM Mitarbeiter LEFT OUTER JOIN Abteilung USING (AbtId);
+
+--
+-- RIGHT OUTER JOIN
+--
+SELECT "RIGHT OUTER JOIN: " AS INFO;
+SELECT * FROM Mitarbeiter RIGHT OUTER JOIN Abteilung USING (AbtId);
+
+--
+-- SELF JOIN
+-- 
+SELECT "SELF JOIN: " AS INFO;
+SELECT MA.MId, MA.Name FROM Mitarbeiter MA CROSS JOIN Mitarbeiter MB WHERE MA.MId <> MB.MId AND MA.Name = MB.Name;
 --
 -- NATURAL JOIN
 --
