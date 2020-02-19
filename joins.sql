@@ -36,7 +36,8 @@ DROP TABLE IF EXISTS `Mitarbeiter`;
 CREATE TABLE `Mitarbeiter` (
     `MId` varchar(10), 
     `Name` varchar(40),
-    `AbtId` int
+    `AbtId` int,
+    PRIMARY KEY(MId)
 );
 -- Daten in Tabelle `Mitarbeiter` einfügen
 INSERT INTO `Mitarbeiter` VALUES 
@@ -50,7 +51,8 @@ DROP TABLE IF EXISTS `Abteilung`;
 -- und neu anlegen
 CREATE TABLE `Abteilung` (
     `AbtId` int, 
-    `Name` varchar(40)
+    `Name` varchar(40),
+    PRIMARY KEY(AbtId)
 );
 -- Daten in Tabelle `Abteilung` einfügen
 INSERT INTO `Abteilung` VALUES 
