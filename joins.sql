@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS `Mitarbeiter`;
 CREATE TABLE `Mitarbeiter` (
     `MId` varchar(10), 
     `Name` varchar(40),
-    `AbtId` int,
+    `AbtId` int REFERENCES Abteilung(AbtId),
     PRIMARY KEY(MId)
 );
 -- Daten in Tabelle `Mitarbeiter` einfügen
