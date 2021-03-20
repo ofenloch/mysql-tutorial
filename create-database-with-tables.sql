@@ -88,3 +88,5 @@ SELECT "Table 'pet':" as INFO;
 SELECT * from pet;
 SELECT "Table 'event':" as INFO;
 SELECT * from event;
+SELECT "Ages of my pets:" as INFO;
+SELECT name, birth, CURDATE(), TIMESTAMPDIFF(YEAR,birth,CURDATE()) AS age FROM pet ORDER BY age;
