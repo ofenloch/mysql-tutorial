@@ -69,8 +69,8 @@ INSERT INTO `event` VALUES
   ('Slim','1997-08-03','vet','broken rib'),
   ('Bowser','1991-10-12','kennel',''),
   ('Fang','1991-10-12','kennel',''),
-  ('Fang','1998-08-28','birthday','Gave him a new chew toy'),
-  ('Claws','1998-03-17','birthday','Gave him a new flea collar'),
+  ('Fang','1992-08-27','birthday','Gave him a new chew toy'),
+  ('Claws','1991-08-27','birthday','Gave him a new flea collar'),
   ('Whistler','1998-12-09','birthday','First birthday');
 UNLOCK TABLES;
 
