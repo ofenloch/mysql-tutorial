@@ -80,3 +80,11 @@ UNLOCK TABLES;
 UPDATE pet SET birth = birth + INTERVAL 20 YEAR WHERE birth IS NOT NULL;
 UPDATE pet SET death = death + INTERVAL 20 YEAR WHERE death IS NOT NULL;
 UPDATE event SET date = date + INTERVAL 20 YEAR WHERE date IS NOT NULL;
+
+--
+-- Show the tables
+--
+SELECT "Table 'pet':" as INFO;
+SELECT * from pet;
+SELECT "Table 'event':" as INFO;
+SELECT * from event;
